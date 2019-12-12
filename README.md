@@ -4,7 +4,9 @@ unpack pkg file for talesrunner
 
 # Usage
 
-`python tr_pkgtool.py tr4.pkg`
+```
+python tr_pkgtool.py tr4.pkg
+```
 
 (python3)
 
