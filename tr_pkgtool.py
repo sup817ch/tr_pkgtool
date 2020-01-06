@@ -81,18 +81,21 @@ def main():
         decompressed_entry_data=zlib.decompress(entry_data)
         file_path=os.path.join(pkg_name,read_str(decompressed_entry_data))
         file_dir=os.path.dirname(file_path)
+        part_num=int.from_bytes(decompressed_entry_data[0x410:0x414],byteorder='little') #compressed file data part total number
         offset=int.from_bytes(decompressed_entry_data[0x414:0x418],byteorder='little') #file body offset
         pkg.seek(offset,0)
-        pkg.seek(0x8,1)
-        file_size=int.from_bytes(pkg.read(4),byteorder='little') #encrypted file data size
-        pkg.seek(0x4,1)
-        encrypt_type=int.from_bytes(pkg.read(4),byteorder='little')
-        file_data=pkg.read(file_size) #encrypted file data
-        decrypted_file_data=file_data
-        if encrypt_type&1:
-            decrypted_file_data=zlib.decompress(decrypted_file_data)
-        if encrypt_type&2:
-            decrypted_file_data=decrypt2(decrypted_file_data)
+        decrypted_file_data=bytes()
+        for i in range(part_num):
+            pkg.seek(0x8,1)
+            file_size=int.from_bytes(pkg.read(4),byteorder='little') #encrypted file data size
+            pkg.seek(0x4,1)
+            encrypt_type=int.from_bytes(pkg.read(4),byteorder='little')
+            file_data=pkg.read(file_size) #encrypted file data
+            if encrypt_type&1:
+                file_data=zlib.decompress(file_data)
+            if encrypt_type&2:
+                file_data=decrypt2(file_data)
+            decrypted_file_data+=file_data
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)
         export_file=open(file_path,'wb')
