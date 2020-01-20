@@ -47,11 +47,8 @@ def decrypt2(data):
     return bytes(decrypt_data)
 
 def read_str(bt):
-    i=0
-    s=''
-    while bt[i]!=0:
-        s+=chr(bt[i])
-        i=i+1
+    i=bt.find(b'\x00')
+    s=bt[:i].decode('EUC_KR')
     return s
 
 def main():
